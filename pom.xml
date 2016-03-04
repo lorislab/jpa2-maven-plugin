@@ -140,6 +140,7 @@
                 <version>2.9.1</version>
                 <inherited>true</inherited>
                 <configuration>
+                    <excludePackageNames>org.lorislab.maven.jpa2.persistence.jpa21</excludePackageNames>
                     <aggregate>true</aggregate>
                     <links>
                         <link>http://docs.oracle.com/javase/8/docs/api/</link>
