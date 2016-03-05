@@ -18,7 +18,6 @@ package org.lorislab.maven.jpa2;
 import java.io.File;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -37,7 +36,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
-import org.hibernate.engine.jdbc.internal.DDLFormatterImpl;
 import org.lorislab.maven.jpa2.persistence.PersistenceModel;
 import org.lorislab.maven.jpa2.persistence.PersistenceModel21;
 import org.lorislab.maven.jpa2.util.XMLUtil;
@@ -98,9 +96,6 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     @Parameter(defaultValue = "create.sql")
     private String createTargetFile;
 
-    @Parameter(defaultValue = "true")
-    private boolean format;
-
     /**
      * {@inheritDoc }
      */
@@ -140,27 +135,7 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         final ClassLoader cl = getClassLoader(oldClassLoader);
         currentThread.setContextClassLoader(cl);
         Persistence.generateSchema(persistentUnit, properties);
-        currentThread.setContextClassLoader(oldClassLoader);
-
-        if (format) {
-            try {
-                if (Files.exists(createFile)) {
-                    format(createFile);
-                }                
-                if (Files.exists(dropFile)) {
-                    format(dropFile);
-                }
-            } catch (Exception ex) {
-                throw new MojoExecutionException("Error formating the SQL target scripts", ex);
-            }
-        }
-    }
-
-    private void format(Path path) throws Exception {
-        DDLFormatterImpl formatter = new DDLFormatterImpl();
-        String tmp = new String(Files.readAllBytes(path));
-        tmp = formatter.format(tmp);
-        Files.write(path, tmp.getBytes());
+        currentThread.setContextClassLoader(oldClassLoader);      
     }
 
     private String getPersistentUnit() throws MojoExecutionException {
