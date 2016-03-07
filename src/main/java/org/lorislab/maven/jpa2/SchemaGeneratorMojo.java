@@ -84,13 +84,13 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     /**
      * The database major version.
      */
-    @Parameter(defaultValue = "")
+    @Parameter
     private String databaseMajorVersion;
 
     /**
      * The database minor version.
      */
-    @Parameter(defaultValue = "")
+    @Parameter
     private String databaseMinorVersion;
 
     /**
@@ -122,6 +122,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = ";")
     private String delimiter;
+
+    /**
+     * Create output directory for the database product name. Default: true
+     * 
+     * For {@code true}
+     * <outputTargetDir>/<databaseProductName-databaseMajorVersion.databaseMinorVersion>/<dropTargetFile>
+     * 
+     * for {@code false}
+     * <outputTargetDir>/<dropTargetFile>
+     */
+    @Parameter(defaultValue = "true")
+    private boolean databaseProductDir;
     
     /**
      * {@inheritDoc }
@@ -133,6 +145,18 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
         Path buildDir = Paths.get(project.getBuild().getDirectory());
         Path outputDir = buildDir.resolve(outputTargetDir);
+        
+        if (databaseProductDir) {
+            String vf = databaseProductName.toLowerCase();
+            if (databaseMajorVersion != null && !databaseMajorVersion.isEmpty()) {
+                vf = vf + "-" + databaseMajorVersion;
+                if (databaseMinorVersion != null && !databaseMinorVersion.isEmpty()) {
+                    vf = vf + "." + databaseMinorVersion;
+                }
+            }
+            outputDir = outputDir.resolve(vf);
+        }
+        
         Path dropFile = outputDir.resolve(dropTargetFile);
         Path createFile = outputDir.resolve(createTargetFile);
 
@@ -158,14 +182,14 @@ public class SchemaGeneratorMojo extends AbstractMojo {
 
         // hibernate delimiter
         properties.put("hibernate.hbm2ddl.delimiter", delimiter);
-        
+
         final Thread currentThread = Thread.currentThread();
         final ClassLoader oldClassLoader = currentThread.getContextClassLoader();
 
         final ClassLoader cl = getClassLoader(oldClassLoader);
         currentThread.setContextClassLoader(cl);
         Persistence.generateSchema(persistentUnit, properties);
-        currentThread.setContextClassLoader(oldClassLoader);      
+        currentThread.setContextClassLoader(oldClassLoader);
     }
 
     private String getPersistentUnit() throws MojoExecutionException {
