@@ -75,27 +75,54 @@ public class SchemaGeneratorMojo extends AbstractMojo {
     @Parameter
     private String persistenceUnit;
 
+    /**
+     * The database product name;
+     */
     @Parameter(required = true)
     private String databaseProductName;
 
+    /**
+     * The database major version.
+     */
     @Parameter(defaultValue = "")
     private String databaseMajorVersion;
 
+    /**
+     * The database minor version.
+     */
     @Parameter(defaultValue = "")
     private String databaseMinorVersion;
 
+    /**
+     * The script action. Default: drop-and-create
+     */
     @Parameter(defaultValue = "drop-and-create")
     private String scriptAction;
 
+    /**
+     * The output target directory. Default: generated-schema.
+     */
     @Parameter(defaultValue = "generated-schema")
     private String outputTargetDir;
 
+    /**
+     * The drop target file. Default: drop.sql.
+     */
     @Parameter(defaultValue = "drop.sql")
     private String dropTargetFile;
 
+    /**
+     * The create target file. Default: create.sql.
+     */
     @Parameter(defaultValue = "create.sql")
     private String createTargetFile;
 
+    /**
+     * The SQL delimiter. Default ;
+     */
+    @Parameter(defaultValue = ";")
+    private String delimiter;
+    
     /**
      * {@inheritDoc }
      */
@@ -129,6 +156,9 @@ public class SchemaGeneratorMojo extends AbstractMojo {
         properties.put("javax.persistence.schema-generation.scripts.drop-target", dropFile.toString());
         properties.put("javax.persistence.schema-generation.scripts.create-target", createFile.toString());
 
+        // hibernate delimiter
+        properties.put("hibernate.hbm2ddl.delimiter", delimiter);
+        
         final Thread currentThread = Thread.currentThread();
         final ClassLoader oldClassLoader = currentThread.getContextClassLoader();
 
